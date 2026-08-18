@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>API do Portal ImoFlow</title>
+<style>
+  :root {
+    --bg: #f5f6f4;
+    --surface: #ffffff;
+    --surface-2: #edf1ee;
+    --surface-3: #e3e9e4;
+    --border: #d9e0da;
+    --text: #1a231e;
+    --text-muted: #566058;
+    --text-faint: #7c877e;
+    --accent: #0f6b5c;
+    --accent-strong: #0a4f44;
+    --accent-soft: #e2f0ec;
+    --accent-text-on: #ffffff;
+    --danger: #a3352c;
+    --danger-soft: #fbeae7;
+    --warning: #8a5a00;
+    --warning-soft: #fbf0d9;
+    --post: #a15c1f;
+    --post-soft: #f7e9d9;
+    --delete: #a3352c;
+    --delete-soft: #fbeae7;
+    --get: #0f6b5c;
+    --get-soft: #e2f0ec;
+    --code-bg: #131a16;
+    --code-text: #dbe7e0;
+    --code-key: #7fd8c0;
+    --shadow: 0 1px 2px rgba(20, 30, 24, 0.06), 0 4px 16px rgba(20, 30, 24, 0.05);
+    --radius: 10px;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Roboto, Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101512;
+      --surface: #161d19;
+      --surface-2: #1c2420;
+      --surface-3: #253028;
+      --border: #2b3630;
+      --text: #e6ece8;
+      --text-muted: #a3b0a6;
+      --text-faint: #7c887f;
+      --accent: #4fd6bc;
+      --accent-strong: #86e8d3;
+      --accent-soft: #17332c;
+      --accent-text-on: #06251e;
+      --danger: #ff9a8f;
+      --danger-soft: #3a1c18;
+      --warning: #f0c25e;
+      --warning-soft: #382c11;
+      --post: #f0b06a;
+      --post-soft: #3a2a14;
+      --delete: #ff9a8f;
+      --delete-soft: #3a1c18;
+      --get: #4fd6bc;
+      --get-soft: #17332c;
+      --code-bg: #0b100d;
+      --code-text: #d7e5dd;
+      --code-key: #7fd8c0;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #101512;
+    --surface: #161d19;
+    --surface-2: #1c2420;
+    --surface-3: #253028;
+    --border: #2b3630;
+    --text: #e6ece8;
+    --text-muted: #a3b0a6;
+    --text-faint: #7c887f;
+    --accent: #4fd6bc;
+    --accent-strong: #86e8d3;
+    --accent-soft: #17332c;
+    --accent-text-on: #06251e;
+    --danger: #ff9a8f;
+    --danger-soft: #3a1c18;
+    --warning: #f0c25e;
+    --warning-soft: #382c11;
+    --post: #f0b06a;
+    --post-soft: #3a2a14;
+    --delete: #ff9a8f;
+    --delete-soft: #3a1c18;
+    --get: #4fd6bc;
+    --get-soft: #17332c;
+    --code-bg: #0b100d;
+    --code-text: #d7e5dd;
+    --code-key: #7fd8c0;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-strong); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; color: var(--text); }
+  p { max-width: 68ch; }
+
+  code, pre, kbd { font-family: var(--mono); }
+
+  /* ---------- layout shell ---------- */
+  .shell {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 22px 18px 40px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .brand__mark {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    background: var(--accent);
+    color: var(--accent-text-on);
+    padding: 3px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+  }
+  .brand__name { font-weight: 800; font-size: 15px; }
+  .brand__version { color: var(--text-faint); font-size: 12px; font-family: var(--mono); margin: 0 0 22px; }
+
+  .nav-group { margin-bottom: 4px; }
+  .nav-group summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 8px;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .nav-group summary::-webkit-details-marker { display: none; }
+  .nav-group summary:hover { background: var(--surface-2); color: var(--text); }
+  .nav-group summary::after {
+    content: "";
+    width: 6px; height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.15s ease;
+  }
+  .nav-group[open] summary::after { transform: rotate(45deg); }
+  .nav-list { list-style: none; margin: 2px 0 10px; padding: 0; display: flex; flex-direction: column; }
+  .nav-list a {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 6px 8px 6px 10px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  .nav-list a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+  .nav-list .m {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .m--get { background: var(--get-soft); color: var(--get); }
+  .m--post { background: var(--post-soft); color: var(--post); }
+  .m--delete { background: var(--delete-soft); color: var(--delete); }
+
+  .main {
+    max-width: 900px;
+    padding: 48px 56px 120px;
+  }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar {
+      position: relative;
+      height: auto;
+      max-height: none;
+    }
+    .main { padding: 32px 20px 100px; }
+    .nav-toggle-wrap { display: block; }
+  }
+
+  /* ---------- intro / cover ---------- */
+  .cover { margin-bottom: 56px; }
+  .cover .kicker {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--accent-strong);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cover h1 { font-size: 38px; margin: 10px 0 12px; }
+  .cover .lede { color: var(--text-muted); font-size: 17px; max-width: 62ch; }
+
+  .baseurl {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 14px;
+    max-width: 640px;
+    box-shadow: var(--shadow);
+  }
+  .baseurl .tag { color: var(--code-key); }
+
+  /* ---------- section ---------- */
+  .section { margin-top: 64px; padding-top: 8px; }
+  .section > h2 {
+    font-size: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+  .section > h2 .num { font-family: var(--mono); color: var(--text-faint); font-weight: 700; font-size: 16px; }
+  .section-intro { color: var(--text-muted); margin: -6px 0 28px; }
+
+  /* ---------- endpoint card ---------- */
+  .endpoint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 26px;
+    scroll-margin-top: 20px;
+  }
+  .endpoint__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .method {
+    font-family: var(--mono);
+    font-weight: 800;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    padding: 4px 9px;
+    border-radius: 6px;
+  }
+  .method--get { background: var(--get-soft); color: var(--get); }
+  .method--post { background: var(--post-soft); color: var(--post); }
+  .method--delete { background: var(--delete-soft); color: var(--delete); }
+  .endpoint__path { font-family: var(--mono); font-weight: 600; font-size: 15px; }
+  .endpoint__title { color: var(--text-muted); font-size: 13.5px; margin-left: auto; }
+  .endpoint__body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .endpoint__body > p { margin: 0; color: var(--text); }
+  .endpoint__body h4 {
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    margin: 4px 0 -4px;
+  }
+
+  /* ---------- tables ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table.fields { width: 100%; border-collapse: collapse; font-size: 13.8px; min-width: 480px; }
+  table.fields th {
+    text-align: left;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.fields td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.fields tr:last-child td { border-bottom: none; }
+  table.fields code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; font-size: 12.8px; }
+  .req { color: var(--danger); font-size: 11.5px; font-weight: 700; text-transform: uppercase; }
+  .opt { color: var(--text-faint); font-size: 11.5px; }
+
+  /* ---------- code blocks ---------- */
+  .code-block {
+    display: flex;
+    flex-direction: column;
+    background: var(--code-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  pre.code {
+    background: transparent;
+    color: var(--code-text);
+    padding: 4px 16px 14px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .copy-btn {
+    align-self: flex-end;
+    flex-shrink: 0;
+    margin: 8px 8px 0 0;
+    font-family: var(--sans);
+    font-size: 11.5px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.08);
+    color: var(--code-text);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 6px;
+    padding: 4px 9px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.16); }
+
+  /* ---------- callouts ---------- */
+  .callout {
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    border-left: 3px solid;
+    display: flex;
+    gap: 10px;
+  }
+  .callout__icon { font-family: var(--mono); font-weight: 800; flex-shrink: 0; }
+  .callout--warning { background: var(--warning-soft); border-color: var(--warning); }
+  .callout--warning .callout__icon { color: var(--warning); }
+  .callout--info { background: var(--accent-soft); border-color: var(--accent); }
+  .callout--info .callout__icon { color: var(--accent-strong); }
+
+  /* ---------- error table shortcuts ---------- */
+  .status { font-family: var(--mono); font-weight: 700; padding: 1px 6px; border-radius: 4px; font-size: 12.5px; }
+  .status--4 { background: var(--warning-soft); color: var(--warning); }
+  .status--5 { background: var(--danger-soft); color: var(--danger); }
+  .status--2 { background: var(--get-soft); color: var(--get); }
+
+  /* ---------- misc ---------- */
+  .badge-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: var(--text-muted);
+  }
+  hr.rule { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  footer.doc-footer {
+    margin-top: 70px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  /* ---------- print ---------- */
+  @media print {
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f1f3f1;
+      --surface-3: #e3e9e4;
+      --border: #cfd6d1;
+      --text: #141b17;
+      --text-muted: #4a544c;
+      --text-faint: #6d766f;
+      --accent: #0f6b5c;
+      --accent-strong: #0a4f44;
+      --accent-soft: #e2f0ec;
+      --accent-text-on: #ffffff;
+      --danger: #a3352c;
+      --danger-soft: #fbeae7;
+      --warning: #8a5a00;
+      --warning-soft: #fbf0d9;
+      --post: #a15c1f;
+      --post-soft: #f7e9d9;
+      --delete: #a3352c;
+      --delete-soft: #fbeae7;
+      --get: #0f6b5c;
+      --get-soft: #e2f0ec;
+      --code-bg: #131a16;
+      --code-text: #dbe7e0;
+      --shadow: none;
+    }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
+    html { scroll-behavior: auto; }
+    body { font-size: 12.5px; }
+    .shell { display: block; }
+    .sidebar { display: none; }
+    .main { max-width: 100%; padding: 18px 6px 40px; }
+    .cover { margin-bottom: 32px; }
+    .cover h1 { font-size: 28px; }
+    .section { margin-top: 34px; break-before: page; }
+    .section:first-of-type { break-before: avoid; }
+    .endpoint { break-inside: avoid; box-shadow: none; border: 1px solid var(--border); }
+    table.fields, .callout, .code-block { break-inside: avoid; }
+    .copy-btn { display: none; }
+    a { color: var(--accent-strong); text-decoration: underline; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.82em; color: var(--text-faint); text-decoration: none; }
+    .baseurl { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="sidebar" aria-label="Navegação da documentação">
+    <div class="brand">
+      <span class="brand__mark">API</span>
+      <span class="brand__name">Portal ImoFlow</span>
+    </div>
+    <p class="brand__version">v1.0 &middot; 18/08/2026</p>
+
+    <details class="nav-group" open>
+      <summary>Introdução</summary>
+      <ul class="nav-list">
+        <li><a href="#visao-geral">Visão geral</a></li>
+        <li><a href="#identificacao">Identificação da conta</a></li>
+        <li><a href="#erros-comuns">Erros comuns</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group" open>
+      <summary>Configurações</summary>
+      <ul class="nav-list">
+        <li><a href="#cfg-geral"><span class="m m--get">GET</span>/configuracoesPortal</a></li>
+        <li><a href="#cfg-home-search"><span class="m m--get">GET</span>home-search</a></li>
+        <li><a href="#cfg-sobre"><span class="m m--get">GET</span>sobre</a></li>
+        <li><a href="#cfg-footer"><span class="m m--get">GET</span>footer</a></li>
+        <li><a href="#cfg-home-page"><span class="m m--get">GET</span>home-page</a></li>
+        <li><a href="#cfg-politica"><span class="m m--get">GET</span>politica</a></li>
+        <li><a href="#cfg-header"><span class="m m--get">GET</span>header</a></li>
+        <li><a href="#cfg-categorias"><span class="m m--get">GET</span>categorias-imoveis</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group">
+      <summary>Imobiliária</summary>
+      <ul class="nav-list">
+        <li><a href="#imob-geral"><span class="m m--get">GET</span>/imobiliariaPortal</a></li>
+        <li><a href="#imob-codigo"><span class="m m--get">GET</span>codigo-portal</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group" open>
+      <summary>Imóveis</summary>
+      <ul class="nav-list">
+        <li><a href="#im-busca"><span class="m m--get">GET</span>/imoveis</a></li>
+        <li><a href="#im-opcoes"><span class="m m--get">GET</span>opcoes</a></li>
+        <li><a href="#im-detalhe"><span class="m m--get">GET</span>:refImovel</a></li>
+        <li><a href="#im-finalidade"><span class="m m--get">GET</span>finalidade/:f</a></li>
+        <li><a href="#im-tipo"><span class="m m--get">GET</span>tipoImovel/:t</a></li>
+        <li><a href="#im-finalidade-tipo"><span class="m m--get">GET</span>finalidade+tipo</a></li>
+        <li><a href="#im-por-finalidade"><span class="m m--get">GET</span>por-finalidade/:f</a></li>
+        <li><a href="#im-sugestoes"><span class="m m--get">GET</span>sugestoes</a></li>
+        <li><a href="#im-semelhantes"><span class="m m--get">GET</span>semelhantes/:ref</a></li>
+        <li><a href="#im-corretor"><span class="m m--get">GET</span>corretor-do-imovel</a></li>
+        <li><a href="#im-imagem"><span class="m m--get">GET</span>imagem/:ref</a></li>
+        <li><a href="#im-imagem-arquivo"><span class="m m--get">GET</span>imagem/:ref/:file</a></li>
+        <li><a href="#im-cidades"><span class="m m--get">GET</span>/cidades</a></li>
+        <li><a href="#im-cidades-detalhes"><span class="m m--get">GET</span>cidades/detalhes</a></li>
+        <li><a href="#im-bairros"><span class="m m--get">GET</span>/bairros</a></li>
+        <li><a href="#im-bairros-detalhes"><span class="m m--get">GET</span>bairros/detalhes</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group">
+      <summary>Empreendimentos</summary>
+      <ul class="nav-list">
+        <li><a href="#emp-categorias"><span class="m m--get">GET</span>categorias</a></li>
+        <li><a href="#emp-lista"><span class="m m--get">GET</span>/empreendimentos</a></li>
+        <li><a href="#emp-detalhe"><span class="m m--get">GET</span>/condominio/:id</a></li>
+        <li><a href="#emp-imagens"><span class="m m--get">GET</span>imagens/:id</a></li>
+        <li><a href="#emp-possui"><span class="m m--get">GET</span>possui-imoveis</a></li>
+        <li><a href="#emp-imoveis"><span class="m m--get">GET</span>imoveis/:id</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group">
+      <summary>Corretores &amp; opções</summary>
+      <ul class="nav-list">
+        <li><a href="#cor-lista"><span class="m m--get">GET</span>/corretores</a></li>
+        <li><a href="#cor-detalhe"><span class="m m--get">GET</span>/corretores/:id</a></li>
+        <li><a href="#cor-opcoes"><span class="m m--get">GET</span>/imovel-opcoes</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group" open>
+      <summary>Captação de leads</summary>
+      <ul class="nav-list">
+        <li><a href="#lead-imovel"><span class="m m--post">POST</span>salvar-lead/:ref</a></li>
+        <li><a href="#lead-geral"><span class="m m--post">POST</span>salvar-lead-geral</a></li>
+        <li><a href="#lead-condominio"><span class="m m--post">POST</span>salvar-lead-condominio</a></li>
+        <li><a href="#lead-campanha"><span class="m m--post">POST</span>salvar-lead-campanha</a></li>
+        <li><a href="#lead-chat"><span class="m m--post">POST</span>salvar-lead-chat</a></li>
+        <li><a href="#lead-email"><span class="m m--post">POST</span>send-email</a></li>
+        <li><a href="#lead-email-imovel"><span class="m m--post">POST</span>send-imovel-email</a></li>
+        <li><a href="#lead-email-pessoa"><span class="m m--post">POST</span>send-email-pessoa</a></li>
+        <li><a href="#lead-email-imobiliaria"><span class="m m--post">POST</span>send-email-imobiliaria</a></li>
+        <li><a href="#lead-email-site"><span class="m m--post">POST</span>sendWebsiteEmail</a></li>
+        <li><a href="#lead-financiamento"><span class="m m--post">POST</span>simular-financiamento</a></li>
+        <li><a href="#lead-quinto-andar"><span class="m m--post">POST</span>salvar-lead-quinto-andar</a></li>
+        <li><a href="#lead-visita"><span class="m m--post">POST</span>/visits</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group">
+      <summary>Correspondente bancário</summary>
+      <ul class="nav-list">
+        <li><a href="#corr-validate"><span class="m m--get">GET</span>:token/validate</a></li>
+        <li><a href="#corr-auth"><span class="m m--post">POST</span>:token/auth</a></li>
+        <li><a href="#corr-proposta"><span class="m m--get">GET</span>proposta</a></li>
+        <li><a href="#corr-historico"><span class="m m--get">GET</span>proposta/historico</a></li>
+        <li><a href="#corr-update"><span class="m m--post">POST</span>update</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group">
+      <summary>Outros</summary>
+      <ul class="nav-list">
+        <li><a href="#out-atendimento"><span class="m m--get">GET</span>/atendimentos/:id</a></li>
+        <li><a href="#out-lp-get"><span class="m m--get">GET</span>landing-page/historico</a></li>
+        <li><a href="#out-lp-post"><span class="m m--post">POST</span>landing-page/historico</a></li>
+        <li><a href="#out-lp-delete"><span class="m m--delete">DEL</span>landing-page/historico</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group">
+      <summary>Apêndice</summary>
+      <ul class="nav-list">
+        <li><a href="#apendice">Notas de integração</a></li>
+      </ul>
+    </details>
+  </nav>
+
+  <main class="main">
+
+    <div class="cover">
+      <p class="kicker">Documentação de referência &middot; v1.0</p>
+      <h1 id="visao-geral">API do Portal ImoFlow</h1>
+      <p class="lede">Como consumir dados de imóveis, empreendimentos e corretores da sua conta ImoFlow, e enviar leads capturados no seu site direto para o CRM.</p>
+
+      <div class="baseurl">
+        <span class="tag">BASE_URL</span>
+        <span>https://so-mansoes.imoflow.app.br/api/portal</span>
+      </div>
+    </div>
+
+    <section class="section" id="identificacao">
+      <h2><span class="num">§1</span> Como a identificação da conta funciona</h2>
+      <p class="section-intro">A API identifica automaticamente qual imobiliária está fazendo a chamada pelo domínio usado na requisição — o subdomínio gratuito já atribuído à sua conta (ex.: <code>so-mansoes.imoflow.app.br</code>). Use exatamente essa base em todas as chamadas.</p>
+
+      <div class="callout callout--warning">
+        <span class="callout__icon">!</span>
+        <div>
+          <strong>Limitação atual:</strong> não existe hoje um mecanismo de chave de API (API key) para estes endpoints — a identificação é feita inteiramente pelo domínio da chamada. Trate a base URL como configuração sensível, e prefira fazer chamadas de escrita (leads) a partir do seu próprio backend, não direto do navegador do visitante.
+        </div>
+      </div>
+
+      <h4 style="margin-top:20px">Formato de resposta — atenção</h4>
+      <p>Nem todo endpoint responde em JSON. Vários endpoints de escrita alternam entre <strong>texto puro</strong> e <strong>JSON</strong> dependendo do resultado — cada endpoint abaixo indica o formato exato de cada resposta possível. Corpos de erro também variam: <code>{"message": "..."}</code>, string solta, ou <code>{"erro": "..."}</code> — não generalize entre endpoints.</p>
+
+      <h4>Autenticação</h4>
+      <p>Leitura (GET) e a maioria dos POSTs de lead: nenhuma — identificação só pelo domínio. O <a href="#correspondente">correspondente bancário</a> usa um fluxo próprio de token + código de acesso + sessão temporária.</p>
+    </section>
+
+    <section class="section" id="erros-comuns">
+      <h2><span class="num">§2</span> Erros comuns a todos os endpoints</h2>
+      <p class="section-intro">Antes de qualquer lógica específica, toda requisição passa por uma verificação de conta que pode retornar:</p>
+      <div class="table-wrap">
+        <table class="fields">
+          <thead><tr><th>Status</th><th>Corpo</th><th>Quando ocorre</th></tr></thead>
+          <tbody>
+            <tr><td><span class="status status--4">400</span></td><td><code>{"message":"Host não encontrado"}</code></td><td>Requisição sem header <code>Host</code></td></tr>
+            <tr><td><span class="status status--4">402</span></td><td><code>{"message":"...suspenso...","code":"SITE_SUSPENDED","logoUrl":string|null}</code></td><td>Assinatura da conta irregular. <strong>Trate este código</strong> — pode ocorrer mesmo com a integração correta, se a fatura atrasar.</td></tr>
+            <tr><td><span class="status status--4">404</span></td><td><code>{"message":"Imobiliária/Cliente não encontrado para o domínio"}</code></td><td>Domínio não corresponde a nenhuma conta — geralmente erro de configuração da base URL</td></tr>
+            <tr><td><span class="status status--5">500</span></td><td><code>{"message":"Erro ao buscar cliente"}</code></td><td>Erro interno ao identificar a conta</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ CONFIGURAÇÕES ============ -->
+    <section class="section" id="configuracoes">
+      <h2><span class="num">§3</span> Configurações do Portal</h2>
+      <p class="section-intro">Base: <code>/configuracoesPortal</code>. Dados visuais e institucionais da imobiliária.</p>
+
+      <article class="endpoint" id="cfg-geral">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal</code><span class="endpoint__title">Configuração geral</span></header>
+        <div class="endpoint__body">
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>nomePortal</code></td><td>string</td><td>Nome exibido do portal</td></tr>
+              <tr><td><code>slogan</code></td><td>string</td><td>Slogan da imobiliária</td></tr>
+              <tr><td><code>logo</code></td><td>{filename,url}</td><td>Logo principal</td></tr>
+              <tr><td><code>favicon</code></td><td>{filename,url}</td><td>Favicon</td></tr>
+              <tr><td><code>corPrimaria</code> / <code>corSecundaria</code></td><td>string (hex)</td><td>Cores principais</td></tr>
+              <tr><td><code>paleta</code></td><td>object</td><td>Paleta completa: <code>{nome, base, customizada, tons:{t50..t900}}</code></td></tr>
+              <tr><td><code>mapeamento</code></td><td>object</td><td>Mapeamento de cores por área da UI</td></tr>
+              <tr><td><code>celular01</code> / <code>celular02</code></td><td>string</td><td>Telefones de contato</td></tr>
+              <tr><td><code>googleTagManagerID</code> / <code>facebookPixelID</code></td><td>string</td><td>IDs de tracking</td></tr>
+              <tr><td><code>enderecoPrincipal</code></td><td>object</td><td><code>{cep,rua,numero,complemento,bairro,cidade,estado}</code></td></tr>
+              <tr><td><code>palavrasChave</code> / <code>descricao</code></td><td>string</td><td>Meta tags SEO</td></tr>
+              <tr><td><code>ogTitulo</code> / <code>ogDescricao</code> / <code>ogImagemUrl</code></td><td>string</td><td>Open Graph</td></tr>
+              <tr><td><code>whatsappPortal</code></td><td>object</td><td>Config do botão flutuante de WhatsApp</td></tr>
+              <tr><td><code>linkFacebook</code> / <code>linkInstagram</code></td><td>string</td><td>Redes sociais</td></tr>
+              <tr><td><code>formularioContato</code></td><td>object</td><td><code>{modelo:'A'|'B', titulo, textoBotaoCTA, textoBotao, corBotao, emailObrigatorio, formularioAberto}</code></td></tr>
+              <tr><td><code>modeloBuscaHome</code></td><td>'A'|'B'|'C'|'D'</td><td>Layout da busca da home</td></tr>
+              <tr><td><code>textoBotaoBusca</code></td><td>string</td><td>Texto do botão de busca</td></tr>
+              <tr><td><code>iconeBotaoBusca</code></td><td>object</td><td><code>{mostrar, posicao}</code></td></tr>
+            </tbody>
+          </table></div>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Configuração não encontrada para este tenant'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-home-search">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/home-search</code><span class="endpoint__title">Modelo e opções da busca</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>imagensFundo[]</code>, <code>tempoTransicaoImagens</code>, <code>videoFundo</code>, <code>tipoFundo</code> (<code>'imagem'|'video_upload'|'video_link'</code>), <code>videoUploadUrl</code>, <code>mostrarVideoFundoNoPortal</code>, <code>textoHome</code>, <code>textosHome[]</code>, <code>overlayFundoHome</code>, <code>modeloBuscaHome</code>, <code>textoBotaoBusca</code>, <code>iconeBotaoBusca</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Configurações não encontradas para este tenant'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-sobre">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/sobre</code><span class="endpoint__title">Página Sobre</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>nomePortal</code>, <code>sobre</code> (texto livre), <code>enderecoPrincipal</code>, <code>diasAtendimento[]</code>, <code>horarioAtendimento</code> (<code>{inicio,fim}</code>).</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Configurações não encontradas para este tenant'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-footer">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/footer</code><span class="endpoint__title">Rodapé</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>logoRodape</code>, <code>enderecoPrincipal</code> (ver nota), <code>creci</code>, <code>cnpj</code>, <code>linkFacebook</code>, <code>linkInstagram</code>, <code>celular01</code>, <code>celular02</code>, <code>footerPortal</code> (<code>{corFundo,corTexto}</code>), <code>corPrimaria</code>, <code>paleta</code>, <code>mapeamento</code>.</p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Se <code>mostrarEnderecoNoPortal</code> for <code>false</code>, o campo <code>enderecoPrincipal</code> é <strong>removido inteiramente</strong> da resposta — não vem como <code>null</code>. Trate como opcional.</div></div>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Configurações do footer não encontradas'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-home-page">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/home-page</code><span class="endpoint__title">Blocos da home</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>secoesHome[]</code> — cada seção com <code>chave</code>, <code>visivel</code>, <code>ordem</code>, <code>titulo</code>, <code>subtitulo</code>, <code>conteudo</code>, <code>imagem</code>, <code>cards[]</code>, <code>botoes[]</code>; e <code>unidades[]</code> — filiais com endereço e contato próprios.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Configurações da home page não encontradas'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-politica">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/politica</code><span class="endpoint__title">Política de privacidade</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>politicaPrivacidade</code> (texto/HTML), <code>nomePortal</code>, <code>logo</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Política de privacidade não encontrada'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-header">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/header</code><span class="endpoint__title">Cabeçalho</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>logo</code>, <code>menuHeaderCompleto</code>, <code>celular01</code>, <code>celular02</code>, <code>menuHeader</code> (<code>{cor,opacidade,corTexto,tamanhoDaFonte}</code>), <code>linkFacebook</code>, <code>linkInstagram</code>, <code>paleta</code>, <code>mapeamento</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Configurações do header não encontradas'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cfg-categorias">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/configuracoesPortal/categorias-imoveis</code><span class="endpoint__title">Categorias exibidas</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"tipos": string[], "finalidades": string[]}</code></p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Foi observado que este endpoint tende a retornar sempre arrays vazios, independente dos imóveis cadastrados. Valide com uma chamada real antes de depender dele.</div></div>
+          <h4>Erros</h4>
+          <p><span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code> (sem 404 — sempre 200 com arrays, mesmo vazios)</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ IMOBILIÁRIA ============ -->
+    <section class="section" id="imobiliaria">
+      <h2><span class="num">§4</span> Imobiliária</h2>
+      <p class="section-intro">Base: <code>/imobiliariaPortal</code>.</p>
+
+      <article class="endpoint" id="imob-geral">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imobiliariaPortal</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"baseUrl": string}</code> — apenas este campo.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Imobiliária não encontrada'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="imob-codigo">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imobiliariaPortal/codigo-portal</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"codigoPortal": string}</code></p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Imobiliária não encontrada'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ IMÓVEIS ============ -->
+    <section class="section" id="imoveis">
+      <h2><span class="num">§5</span> Imóveis</h2>
+      <p class="section-intro">Base: <code>/imoveis</code>, <code>/cidades</code>, <code>/bairros</code>. O grupo mais importante do catálogo.</p>
+
+      <div class="callout callout--info">
+        <span class="callout__icon">i</span>
+        <div>Campos de <strong>valor</strong> (<code>valorVenda</code>, <code>valorAluguel</code>, <code>valorTemporada</code>, <code>valorCondominio</code>, <code>valorIptu</code>) e de <strong>localização</strong> (<code>cep</code>, <code>rua</code>, <code>numero</code>, <code>complemento</code>, <code>bairro</code>, <code>cidade</code>, <code>estado</code>, <code>andar</code>) só aparecem se a respectiva flag de visibilidade estiver <code>true</code>. Se <code>false</code> ou ausente, o campo é <strong>omitido do JSON</strong> — trate sempre como opcional (<code>imovel.valores?.valorVenda</code>). <code>localizacao.id_condominio</code> é a única exceção, sempre presente.</div>
+      </div>
+
+      <article class="endpoint" id="im-busca">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis</code><span class="endpoint__title">Busca principal</span></header>
+        <div class="endpoint__body">
+          <p>O endpoint central do catálogo — todos os filtros da busca do site devem passar por aqui.</p>
+          <h4>Query params</h4>
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Param</th><th>Tipo</th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>page</code> / <code>limit</code></td><td>number</td><td>Paginação. Se ambos inválidos, retorna tudo sem paginar</td></tr>
+              <tr><td><code>sortField</code></td><td>string</td><td>Default <code>_id</code>. Se começar com <code>valores.</code>, ordena pelo valor mais relevante (venda &gt; aluguel &gt; temporada)</td></tr>
+              <tr><td><code>sortOrder</code></td><td>'asc'|'desc'</td><td>Default <code>desc</code></td></tr>
+              <tr><td><code>finalidade</code></td><td>string</td><td>Match exato (ignora acento/caixa): <code>Venda</code>, <code>Aluguel</code>, <code>Temporada</code></td></tr>
+              <tr><td><code>minVenda</code> / <code>maxVenda</code></td><td>number</td><td>Faixa de preço de venda</td></tr>
+              <tr><td><code>minAluguel</code> / <code>maxAluguel</code></td><td>number</td><td>Faixa de aluguel — também aplica a Temporada</td></tr>
+              <tr><td><code>minArea</code> / <code>maxArea</code></td><td>number</td><td>Faixa de área total (m²)</td></tr>
+              <tr><td><code>tipoImovels</code></td><td>string (CSV)</td><td>Lista de tipos, ex. <code>Apartamento,Casa</code></td></tr>
+              <tr><td><code>tipoImovel</code></td><td>string</td><td>Filtro único (sobrescreve <code>tipoImovels</code> se ambos enviados)</td></tr>
+              <tr><td><code>quartos</code> / <code>suites</code> / <code>salas</code> / <code>banheiros</code> / <code>vagas</code></td><td>string</td><td>Número exato ou <code>"N+"</code>. <code>vagas</code> também aceita <code>"Indiferente"</code></td></tr>
+              <tr><td><code>condicoesPagamento</code></td><td>string</td><td>Um único valor</td></tr>
+              <tr><td><code>status</code></td><td>string (CSV)</td><td>Ex. <code>Disponível,Reservado</code></td></tr>
+              <tr><td><code>categoria</code></td><td>string ou array</td><td>Categoria(s)</td></tr>
+              <tr><td><code>cidades</code> / <code>bairros</code> / <code>estados</code></td><td>string (CSV)</td><td>Busca por substring; item pode ser <code>"nome"</code> ou <code>"nome||estado"</code></td></tr>
+              <tr><td><code>cidade</code> / <code>bairro</code></td><td>string</td><td>Versões legadas, match exato</td></tr>
+              <tr><td><code>condominio_nome</code></td><td>string (CSV)</td><td>Filtra por nome de condomínio</td></tr>
+              <tr><td><code>locationOr</code></td><td>"tipo:valor,..."</td><td>Filtro combinado (<code>cidade:</code>, <code>bairro:</code>, <code>estado:</code>, <code>condominio:</code>). Substitui os filtros de localização acima quando presente</td></tr>
+              <tr><td><code>query</code></td><td>string (CSV)</td><td>Busca textual livre — ignorado se filtros de localização estiverem presentes</td></tr>
+              <tr><td><code>allProperties</code></td><td>qualquer</td><td><span class="req">Não usar</span> — remove o filtro de "publicado no portal"</td></tr>
+              <tr><td><code>maisAcessados</code></td><td>qualquer</td><td>Modo especial: 6 mais acessados. <strong>Resposta é array puro</strong></td></tr>
+              <tr><td><code>destaque</code></td><td>qualquer</td><td>Modo especial: apenas destaques. <strong>Resposta é array puro</strong></td></tr>
+            </tbody>
+          </table></div>
+
+          <h4>Resposta 200 (modo normal)</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">{
+  "totalImoveis": 42,
+  "imoveis": [ /* ver estrutura do imóvel abaixo */ ]
+}</pre></div>
+
+          <h4>Estrutura de cada item em <code>imoveis[]</code></h4>
+          <p style="color:var(--text-faint); font-size:13px; margin:-4px 0 0">Mesma estrutura em todos os endpoints de listagem desta seção.</p>
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>_id</code></td><td>string</td><td>ID do imóvel</td></tr>
+              <tr><td><code>sobre</code></td><td>object</td><td><code>{finalidade:string[], tipoImovel, categoria, refImovel}</code></td></tr>
+              <tr><td><code>caracteristicas</code></td><td>object</td><td>quartos, suites, salas, banheiros, vagas, áreas, título/descrição, e opcionalmente <code>etiquetas:[{name,color}]</code></td></tr>
+              <tr><td><code>status</code></td><td>string</td><td><code>Disponível</code>, <code>Vendido</code>, <code>Locado</code>, <code>Reservado</code>, <code>Indisponível</code></td></tr>
+              <tr><td><code>statusTag</code></td><td>object | null</td><td><code>{label, bg, fg}</code> — etiqueta visual pronta</td></tr>
+              <tr><td><code>valores</code></td><td>object</td><td>Ver nota de campos condicionais acima</td></tr>
+              <tr><td><code>localizacao</code></td><td>object</td><td>Ver nota de campos condicionais acima</td></tr>
+              <tr><td><code>midias.imagens</code> / <code>plantas</code></td><td>array (máx. 10)</td><td><code>{filename,url,ordem}</code>, já filtradas por visibilidade</td></tr>
+              <tr><td><code>midias.tour</code> / <code>videos</code></td><td>array (máx. 10)</td><td><code>{url}</code></td></tr>
+              <tr><td><code>cardCorretor.exibirCardCorretor</code></td><td>boolean</td><td></td></tr>
+              <tr><td><code>seo_data</code></td><td>object</td><td><code>{seo_title?, seo_description?, seo_keywords?, seo_canonical?}</code></td></tr>
+              <tr><td><code>condominioAreaMinima</code> / <code>Maxima</code></td><td>number | ausente</td><td>Só presentes se o imóvel pertencer a um condomínio</td></tr>
+            </tbody>
+          </table></div>
+
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl "https://so-mansoes.imoflow.app.br/api/portal/imoveis?finalidade=Venda&amp;minVenda=300000&amp;maxVenda=800000&amp;quartos=3%2B&amp;page=1&amp;limit=12"</pre></div>
+
+          <h4>Erros</h4>
+          <p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code> (sem JSON)</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-opcoes">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/opcoes</code><span class="endpoint__title">Opções de filtro</span></header>
+        <div class="endpoint__body">
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">{
+  "opcoesItensImovel": [{"imoflow":"...","olx":"...","chaves":"...","categoria":"..."}],
+  "opcoesProximidades": ["..."],
+  "opcoesCondicoesPagamento": ["..."]
+}</pre></div>
+          <h4>Erros</h4><p><span class="status status--5">500</span> <code>{message:'Erro no servidor'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-detalhe">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/:refImovel</code><span class="endpoint__title">Detalhe do imóvel</span></header>
+        <div class="endpoint__body">
+          <p><code>refImovel</code> aceita a referência do imóvel, com fallback para slug de SEO se não encontrar por referência.</p>
+          <p>Mesma estrutura da <a href="#im-busca">listagem principal (<code>GET /imoveis</code>)</a>, com diferenças: mídias sem limite de 10; inclui <code>restrito.id_responsavel</code> e <code>updatedAt</code>.</p>
+          <div class="callout callout--info"><span class="callout__icon">i</span><div>Cada chamada incrementa o contador interno de acessos do imóvel (não afeta a resposta).</div></div>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Imóvel não encontrado'}</code> &middot; <span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-finalidade">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/finalidade/:finalidade</code><span class="endpoint__title">Listagem por finalidade</span></header>
+        <div class="endpoint__body">
+          <p>Mesmos query params de <a href="#im-busca"><code>GET /imoveis</code></a> (exceto <code>finalidade</code>/modos especiais). Rota: <code>Venda</code>, <code>Aluguel</code> ou <code>Temporada</code>. Finalidade inexistente retorna lista vazia, sem erro.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-tipo">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/tipoImovel/:tipoImovel</code><span class="endpoint__title">Listagem por tipo</span></header>
+        <div class="endpoint__body">
+          <p>Aceita múltiplos tipos combinados na URL, separados por <code>+</code>, <code>,</code> ou espaço (URL-encoded). Ex.: <code>/imoveis/tipoImovel/Apartamento%2CCasa</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-finalidade-tipo">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/finalidade/:finalidade/tipoImovel/:tipoImovel</code><span class="endpoint__title">Listagem combinada</span></header>
+        <div class="endpoint__body">
+          <p>Mesmas regras dos dois endpoints anteriores, combinadas.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-por-finalidade">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/por-finalidade/:finalidade</code><span class="endpoint__title">Agrupamento simplificado</span></header>
+        <div class="endpoint__body">
+          <p>Versão sem os filtros avançados de <a href="#im-busca"><code>GET /imoveis</code></a>. Query params: <code>page</code> (default 1), <code>limit</code> (default 12).</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-sugestoes">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/sugestoes</code><span class="endpoint__title">Autocomplete de busca</span></header>
+        <div class="endpoint__body">
+          <p>Query param <code>q</code> (termo de busca — retorna <code>[]</code> se vazio), mais os filtros de faixa/característica de <a href="#im-busca"><code>GET /imoveis</code></a> para refinar.</p>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">[
+  { "tipo": "refImovel", "valor": "AB1234" },
+  { "tipo": "cidade", "valor": "São Paulo - SP", "count": 87 },
+  { "tipo": "bairro", "valor": "Vila Mariana (São Paulo)", "count": 12 },
+  { "tipo": "rua", "valor": "Rua Exemplo, Vila Mariana (São Paulo)", "count": 3 },
+  { "tipo": "condominio", "categoria": "Alto Padrão", "valor": "Edifício Exemplo" }
+]</pre></div>
+          <h4>Erros</h4><p><span class="status status--5">500</span> <code>{message:'Erro ao buscar sugestões'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-semelhantes">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/semelhantes/:refImovel</code><span class="endpoint__title">Imóveis semelhantes</span></header>
+        <div class="endpoint__body">
+          <p>Mesmo bairro/categoria/tipo/finalidade, faixa de preço ±25%. Query: <code>page</code> (default 1), <code>limit</code> (default e máximo 20).</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Imóvel base não encontrado'}</code> &middot; <span class="status status--5">500</span> texto puro <code>"Erro ao buscar imóveis semelhantes"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-corretor">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/corretor-do-imovel/:refImovel</code><span class="endpoint__title">Corretor responsável</span></header>
+        <div class="endpoint__body">
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">{
+  "nome": "string",
+  "telefone": "string | null",
+  "email": "string",
+  "foto": { "url": "string" },
+  "creci": "string | null",
+  "titulo": "Corretor Responsável",
+  "textoWhatsApp": "string | null"
+}</pre></div>
+          <p><code>telefone</code>, <code>creci</code> e <code>textoWhatsApp</code> vêm <code>null</code> se o corretor ocultou esses dados no card do portal.</p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Se o responsável cadastrado não existir mais no sistema, a resposta é <strong>200</strong> <code>{"message": "Sem corretor responsável"}</code> — não é 404. Verifique a presença de <code>nome</code> para confirmar sucesso.</div></div>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:'Imóvel sem corretor'}</code> (imóvel não existe OU sem responsável — mesma mensagem) &middot; <span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-imagem">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/imagem/:refImovel</code><span class="endpoint__title">Lista de imagens</span></header>
+        <div class="endpoint__body">
+          <p>Lista crua (inclui imagens não visíveis, sem limite de quantidade): <code>[{filename, url, ordem, visivel?}]</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> string JSON <code>"Imagens não encontradas"</code> &middot; <span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-imagem-arquivo">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imoveis/imagem/:refImovel/:filename</code><span class="endpoint__title">Arquivo de imagem</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> binário (<code>Content-Type: image/jpeg</code> sempre, mesmo se o arquivo original for outro formato).</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> string JSON <code>"Imagens não encontradas"</code>, <code>"Imagem não encontrada"</code> ou <code>"Imagem não encontrada no servidor"</code> &middot; <span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-cidades">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/cidades</code><span class="endpoint__title">Lista simples de cidades</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"cidades": ["São Paulo", "Campinas"]}</code> (não filtra por publicado, ordenado alfabeticamente).</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-cidades-detalhes">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/cidades/detalhes</code><span class="endpoint__title">Cidades com contagem e imagens</span></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"cidades": [{"nome":"São Paulo","quantidade":34,"imagens":["url1","url2"]}]}</code> — até 12 imagens por cidade, apenas imóveis publicados.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> <code>{message:'Erro ao buscar cidades'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-bairros">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/bairros</code><span class="endpoint__title">Lista simples de bairros</span></header>
+        <div class="endpoint__body">
+          <p>Query opcional <code>cidade</code> (filtro exato). <strong>Resposta 200:</strong> <code>{"bairros": ["Centro", "Vila Mariana"]}</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="im-bairros-detalhes">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/bairros/detalhes</code><span class="endpoint__title">Bairros com contagem e imagens</span></header>
+        <div class="endpoint__body">
+          <p>Query opcional <code>cidade</code>. Apenas imóveis publicados, até 12 imagens por bairro.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> <code>{message:'Erro ao buscar bairros'}</code></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ EMPREENDIMENTOS ============ -->
+    <section class="section" id="empreendimentos">
+      <h2><span class="num">§6</span> Empreendimentos e Condomínios</h2>
+      <p class="section-intro">Base: <code>/empreendimentos</code>, <code>/condominio</code>.</p>
+
+      <article class="endpoint" id="emp-categorias">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/empreendimentos/categorias</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> array de strings, ex. <code>["Alto Padrão", "Popular"]</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="emp-lista">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/empreendimentos</code></header>
+        <div class="endpoint__body">
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Param</th><th>Default</th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>page</code></td><td>1</td><td>Página</td></tr>
+              <tr><td><code>limit</code></td><td>6</td><td>Itens por página</td></tr>
+              <tr><td><code>categoria</code></td><td>—</td><td>Busca parcial (ignora caixa)</td></tr>
+              <tr><td><code>all</code></td><td>—</td><td>Se presente, inclui condomínios não marcados para o header do portal padrão</td></tr>
+            </tbody>
+          </table></div>
+          <p><strong>Resposta 200:</strong> <code>{condominios:[...], total, page, limit, totalPages}</code>. Cada condomínio: <code>_id</code>, <code>nome</code>, <code>categoria</code>, <code>imagens[]</code>, <code>tipo</code> (Vertical/Horizontal/Misto), <code>andares</code>, <code>blocos</code>, <code>apartamentoPorAndar</code>, <code>idadeImovel</code>, <code>areaMinima</code>/<code>areaMaxima</code>, <code>fechado</code>, <code>rua</code>/<code>bairro</code>/<code>cidade</code>/<code>estado</code>, <code>dormitorios</code>/<code>suites</code> (<code>{min,max}</code>), <code>vagas</code>/<code>varanda</code>/<code>deposito</code>, <code>unidades</code>, <code>imoveisCount</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="emp-detalhe">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/condominio/:identifier</code><span class="endpoint__title">Detalhe do empreendimento</span></header>
+        <div class="endpoint__body">
+          <p><code>identifier</code> aceita <strong>ID do condomínio ou o nome</strong> (comparado ignorando acentos/caixa/espaços). Por ID, retorna mesmo se oculto do portal; por nome, só visíveis.</p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div><strong>Comportamento não usual:</strong> se não encontrado, a resposta é <strong>200 com corpo <code>null</code></strong> — não é 404. Cheque explicitamente se o corpo é <code>null</code>.</div></div>
+          <p><strong>Resposta 200 (encontrado):</strong> documento completo — <code>nome</code>, <code>areaTerreno</code>, <code>areaMinima</code>/<code>areaMaxima</code>, <code>fechado</code>, <code>tipo</code>, <code>categoria</code>, <code>enderecoCompleto</code>, endereço detalhado, <code>andares</code>/<code>blocos</code>/<code>apartamentoPorAndar</code>/<code>idadeImovel</code>, <code>tituloCondominio</code>/<code>descricaoCondominio</code>, <code>caracteristicas[]</code>, <code>imagens[]</code>/<code>plantas[]</code> (filtradas por visibilidade), <code>tour[]</code>/<code>videos[]</code>, <code>padrao</code>, <code>tipoImovel</code>, <code>incorporadora</code>/<code>construtora</code>, <code>informacoesComplementares</code>, <code>visivelNoHeader</code>, <code>dormitorios</code>/<code>suites</code>/<code>vagas</code>/<code>varanda</code>/<code>deposito</code>, <code>unidades</code>, <code>valorMinimo</code>/<code>valorMaximo</code>, <code>enderecoStand</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="emp-imagens">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/condominio/imagens/:identifier</code></header>
+        <div class="endpoint__body">
+          <p>Mesmo <code>identifier</code> dual acima. <strong>Resposta 200:</strong> array de imagens visíveis <code>{filename, url, ordem}</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{message:"Imagens do condomínio não encontradas."}</code> &middot; <span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="emp-possui">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/condominio/possui-imoveis/:identifier</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200 (sempre):</strong> <code>{"possuiImoveis": boolean}</code> — <code>false</code> também se <code>identifier</code> não for encontrado.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="emp-imoveis">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/condominio/imoveis/:identifier</code></header>
+        <div class="endpoint__body">
+          <p>Imóveis publicados vinculados ao condomínio: <code>sobre</code>, <code>valores</code>, <code>seo_data</code>, características selecionadas, <code>midias.imagens/plantas</code> (filtradas), <code>localizacao</code>, e <code>condominioAreaMinima</code>/<code>Maxima</code> (se o condomínio for encontrado).</p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Recomenda-se validar previamente com <a href="#emp-possui"><code>GET /condominio/possui-imoveis/:identifier</code></a> antes de consultar aqui — o comportamento quando <code>identifier</code> não resolve não é garantido.</div></div>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>"Erro no servidor"</code></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ CORRETORES ============ -->
+    <section class="section" id="corretores">
+      <h2><span class="num">§7</span> Corretores e Opções</h2>
+
+      <article class="endpoint" id="cor-lista">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/corretores</code></header>
+        <div class="endpoint__body">
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">[{ "nome": "string", "telefone": "string", "whatsapp": true, "email": "string", "creci": "string", "foto": {"url":"string"} }]</pre></div>
+          <h4>Erros</h4><p><span class="status status--5">500</span> string JSON <code>"Erro ao buscar corretores"</code> (sem chave)</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cor-detalhe">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/corretores/:id</code></header>
+        <div class="endpoint__body">
+          <p><code>id</code> — ObjectId do corretor (não aceita nome/slug). <strong>Resposta 200:</strong> <code>{"nome","telefone","whatsapp","creci"}</code> — <strong>sem</strong> <code>email</code> nem <code>foto</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"ID de usuário inválido"</code> &middot; <span class="status status--4">404</span> string JSON <code>"Corretor não encontrado"</code> &middot; <span class="status status--5">500</span> string JSON <code>"Erro ao buscar corretor"</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cor-opcoes">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/imovel-opcoes</code><span class="endpoint__title">Opções de tipo/categoria com contagem</span></header>
+        <div class="endpoint__body">
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">{
+  "opcoes": [{"tipoImovel":"Apartamento","categorias":["Alto Padrão","Popular"]}],
+  "categorias": ["Alto Padrão", "Popular"],
+  "counts": [{"tipoImovel":"Apartamento","categoria":"Alto Padrão","count":12}]
+}</pre></div>
+          <h4>Erros</h4><p><span class="status status--5">500</span> — status 500 mas corpo <code>{"opcoes":[],"categorias":[],"error":"Erro no servidor"}</code>. Verifique sempre o status HTTP.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ LEADS ============ -->
+    <section class="section" id="leads">
+      <h2><span class="num">§8</span> Captação de Leads</h2>
+      <p class="section-intro">Base: <code>/salvar-lead*</code>, <code>/send-*</code>, <code>/simular-financiamento</code>. Todos <strong>POST</strong>.</p>
+
+      <div class="callout callout--warning">
+        <span class="callout__icon">!</span>
+        <div>Nos três endpoints principais abaixo (<code>salvar-lead/:refImovel</code>, <code>salvar-lead-geral</code>, <code>salvar-lead-condominio</code>), a resposta de sucesso muda de formato: novo atendimento criado → <strong>200 texto puro</strong> <code>Lead salvo com sucesso.</code>; lead vinculado a atendimento já existente → <strong>200 JSON</strong> <code>{"message": "Lead vinculado a atendimento já existente!"}</code>. Trate as duas formas como sucesso.</div>
+      </div>
+
+      <article class="endpoint" id="lead-imovel">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/salvar-lead/:refImovel</code><span class="endpoint__title">Lead a partir de um imóvel</span></header>
+        <div class="endpoint__body">
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Campo</th><th>Tipo</th><th></th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>nome</code></td><td>string</td><td><span class="req">obrigatório*</span></td><td>Nome do lead</td></tr>
+              <tr><td><code>telefone</code></td><td>string</td><td><span class="req">obrigatório</span></td><td>Validado e convertido para formato BR</td></tr>
+              <tr><td><code>email</code></td><td>string</td><td><span class="opt">opcional</span></td><td>Também usado para identificar lead existente</td></tr>
+              <tr><td><code>mensagem</code></td><td>string</td><td><span class="opt">opcional</span></td><td>Mensagem livre</td></tr>
+              <tr><td><code>finalidade</code></td><td>string</td><td><span class="opt">opcional</span></td><td>Se ausente/incompatível, usa a finalidade do imóvel</td></tr>
+            </tbody>
+          </table></div>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>*<code>nome</code> é obrigatório na prática, mas omiti-lo hoje gera <strong>500</strong> genérico em vez de <strong>400</strong>. Sempre envie preenchido.</div></div>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"Telefone inválido: {telefone}"</code> ou <code>"Telefone é obrigatório"</code> &middot; <span class="status status--4">404</span> texto puro <code>Imóvel não encontrado.</code> &middot; <span class="status status--5">500</span> texto puro <code>Etapa inicial não encontrada.</code> ou <code>Erro inesperado ao salvar lead.</code></p>
+          <h4>Efeito no CRM</h4>
+          <p>Cria/atualiza a Pessoa (dedup por telefone/e-mail), cria ou reaproveita Atendimento vinculando o imóvel, gera perfil de interesse com recomendações, distribui para um corretor.</p>
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl -X POST "https://so-mansoes.imoflow.app.br/api/portal/salvar-lead/AB1234" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"João Silva","telefone":"11987654321","email":"joao@exemplo.com","mensagem":"Tenho interesse neste imóvel","finalidade":"Venda"}'</pre></div>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-geral">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/salvar-lead-geral</code><span class="endpoint__title">Lead genérico</span></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>nome</code> (obrigatório na prática), <code>telefone</code> (obrigatório, validado), <code>mensagem</code> (opcional), <code>finalidade</code> (opcional, texto livre). <strong>Não aceita <code>email</code></strong> — dedup só por telefone.</p>
+          <h4>Erros</h4>
+          <p>Mesmos códigos de <a href="#lead-imovel"><code>POST /salvar-lead/:refImovel</code></a>, sem o caso de imóvel não encontrado.</p>
+          <h4>Efeito no CRM</h4>
+          <p>Cria/atualiza Pessoa, cria/reaproveita Atendimento (sem imóvel vinculado), gera nota de atividade, distribui para corretor. Não gera perfil de interesse detalhado.</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-condominio">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/salvar-lead-condominio/:condominioId</code><span class="endpoint__title">Lead de empreendimento</span></header>
+        <div class="endpoint__body">
+          <p><code>condominioId</code> — ObjectId do condomínio. <strong>Body:</strong> <code>nome</code> (obrigatório na prática), <code>telefone</code> (obrigatório, validado), <code>email</code> (opcional), <code>url</code> (opcional, só compõe o texto da nota interna), <code>mensagem</code> (opcional).</p>
+          <h4>Erros</h4>
+          <p>Mesmos de <a href="#lead-imovel"><code>POST /salvar-lead/:refImovel</code></a>, mais <span class="status status--4">404</span> texto puro <code>Condomínio não encontrado.</code></p>
+          <h4>Efeito no CRM</h4>
+          <p>Cria/atualiza Pessoa, cria/reaproveita Atendimento com finalidade fixa <code>Venda</code> e vínculo ao empreendimento, gera perfil de interesse por região, distribui para corretor.</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-campanha">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/salvar-lead-campanha</code><span class="endpoint__title">Lead de campanha/landing</span></header>
+        <div class="endpoint__body">
+          <p>Diferente dos três anteriores: <strong>validação completa</strong> de campos e resposta <strong>sempre em JSON</strong>.</p>
+          <p><strong>Body (todos obrigatórios):</strong> <code>nome</code>, <code>telefone</code>, <code>origem</code> (ex. <code>facebook</code>), <code>nome_campanha</code>, <code>finalidade</code>, <code>categoria</code>, <code>tipo_imovel</code>.</p>
+          <p><strong>Sucesso (chave <code>mensagem</code>, não <code>message</code>):</strong> <code>{"mensagem": "Lead e atendimento criados com sucesso."}</code> ou <code>{"mensagem": "Lead vinculado a atendimento já existente!"}</code>.</p>
+          <h4>Erros (JSON, chave <code>erro</code>)</h4>
+          <p><span class="status status--4">400</span> <code>{erro:'Campos obrigatórios: nome, telefone, origem, nome_campanha, finalidade, categoria e tipo_imovel.'}</code> &middot; <span class="status status--4">400</span> telefone inválido/obrigatório &middot; <span class="status status--5">500</span> várias mensagens de erro interno</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-chat">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/salvar-lead-chat</code><span class="endpoint__title">Lead vindo de chat</span></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>nome</code> (obrigatório), <code>telefone</code> (obrigatório, validado), <code>rendaFamiliar</code> (opcional), <code>valorEntrada</code> (opcional).</p>
+          <p><strong>Sucesso:</strong> <code>{"mensagem": "Lead e atendimento criados com sucesso."}</code>.</p>
+          <div class="callout callout--info"><span class="callout__icon">i</span><div>Sempre cria um <strong>novo</strong> Atendimento — não verifica atendimentos em andamento como os endpoints de lead anteriores.</div></div>
+          <h4>Erros (JSON, chave <code>erro</code>)</h4>
+          <p><span class="status status--4">400</span> <code>{erro:'Nome e telefone são obrigatórios.'}</code> · telefone inválido &middot; <span class="status status--5">500</span></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-email">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/send-email</code><span class="endpoint__title">Contato por e-mail</span></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>nome</code>, <code>email</code>, <code>assunto</code>, <code>mensagem</code> — nenhum validado. <strong>Sucesso:</strong> texto puro <code>E-mails enviados com sucesso.</code></p>
+          <div class="callout callout--info"><span class="callout__icon">i</span><div>Envia e-mail para a imobiliária + confirmação ao remetente. <strong>Não grava no CRM.</strong></div></div>
+          <h4>Erros</h4><p><span class="status status--4">404</span> texto puro <code>Configurações não encontradas.</code> &middot; <span class="status status--5">500</span> texto puro <code>Erro ao enviar e-mails.</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-email-imovel">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/send-imovel-email</code><span class="endpoint__title">Contato sobre imóvel por e-mail</span></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>nome</code>, <code>celular</code>, <code>email</code>, <code>tipoImovel</code>, <code>negocio</code>, <code>valor</code>, <code>descricao</code>, <code>url</code>. Apenas e-mail, sem gravação no CRM.</p>
+          <h4>Erros</h4><p><span class="status status--4">404</span> texto puro <code>Configurações não encontradas.</code> &middot; <span class="status status--5">500</span> texto puro <code>Erro ao enviar e-mails.</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-email-pessoa">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/send-email-pessoa/:refImovel</code><span class="endpoint__title">Contato direcionado</span></header>
+        <div class="endpoint__body">
+          <p><code>refImovel</code> só usado como texto no e-mail (não valida existência). <strong>Body:</strong> <code>nome</code>, <code>email</code>, <code>assunto</code>, <code>url</code>, <code>finalidade</code> (opcional).</p>
+          <h4>Erros</h4><p><span class="status status--4">404</span> texto puro <code>Configurações não encontradas.</code> &middot; <span class="status status--5">500</span> texto puro <code>Erro ao enviar email para pessoa</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-email-imobiliaria">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/send-email-imobiliaria/:refImovel</code><span class="endpoint__title">Contato direcionado à imobiliária</span></header>
+        <div class="endpoint__body">
+          <p><code>refImovel</code> aqui <strong>é validado</strong>. <strong>Body:</strong> <code>nome</code>, <code>telefone</code>, <code>email</code>, <code>mensagem</code>, <code>url</code>, <code>finalidade</code>.</p>
+          <h4>Erros</h4><p><span class="status status--4">404</span> texto puro <code>Configurações não encontradas.</code> ou <code>Imóvel não encontrado.</code> (mesmo status) &middot; <span class="status status--5">500</span> texto puro <code>Erro ao enviar email para admin</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-email-site">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/sendWebsiteEmail</code></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>nome</code>, <code>email</code>, <code>mensagem</code>.</p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Envia para um e-mail fixo da própria ImoFlow, não da imobiliária — provavelmente não relevante para sua integração. Confirme com o time ImoFlow antes de usar.</div></div>
+          <h4>Erros</h4><p><span class="status status--4">404</span> texto puro <code>Configurações não encontradas.</code> &middot; <span class="status status--5">500</span> texto puro (mensagem variável)</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-financiamento">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/simular-financiamento</code></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> dados pessoais/endereço, <code>telefone</code> (obrigatório, validado), <code>whatsapp</code> (boolean, default false), <code>email</code>, <code>rendaMensal</code>, <code>fgts</code>, <code>valorImovelPretendido</code>.</p>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Envie <code>rendaMensal</code> <strong>sempre como string</strong>, mesmo vazia.</div></div>
+          <p><strong>Sucesso:</strong> <code>{"mensagem": "Simulação criada com sucesso."}</code>.</p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> <code>{erro:'Telefone inválido: ...'}</code> / <code>{erro:'Telefone é obrigatório'}</code> &middot; <span class="status status--5">500</span> texto puro <code>Etapa inicial não encontrada.</code> ou <code>{erro:'Erro ao criar simulação de financiamento.'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-quinto-andar">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/salvar-lead-quinto-andar</code></header>
+        <div class="endpoint__body">
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div><strong>Comportamento único:</strong> não usa identificação por domínio e <strong>não grava no CRM da ImoFlow</strong> — grava numa planilha de integração específica. Não inclua na sua integração a menos que orientado pelo time ImoFlow.</div></div>
+          <p><strong>Body (todos obrigatórios):</strong> <code>nome</code>, <code>telefone</code> (sem validação de formato), <code>tipo</code> (Apartamento/Casa/Kitnet), <code>finalidade</code> (Venda/Aluguel), <code>cep</code>, <code>endereco</code>, <code>numero</code>.</p>
+          <p><strong>Sucesso:</strong> <code>{"message": "Lead salvo com sucesso."}</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> <code>{"message": "..."}</code> — inclusive campo faltante retorna 500, não 400</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="lead-visita">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/visits</code><span class="endpoint__title">Registro de visita/pageview</span></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>url</code> (obrigatório), <code>device</code> (obrigatório).</p>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">// 201
+{ "message": "Visita registrada com sucesso", "visit": { "ip": "...", "device": "...", "url": "...", "localizacao": {"pais":"...","estado":"...","cidade":"...","latitude":0,"longitude":0}, "createdAt": "2026-08-18T12:00:00.000Z" } }</pre></div>
+          <p><code>localizacao</code> pode vir ausente se a geolocalização do IP falhar. Registros expiram automaticamente em 90 dias.</p>
+          <h4>Erros</h4><p><span class="status status--4">400</span> <code>{error:'URL e device são obrigatórios.'}</code> &middot; <span class="status status--5">500</span> <code>{error:'Erro ao registrar visita'}</code></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ CORRESPONDENTE ============ -->
+    <section class="section" id="correspondente">
+      <h2><span class="num">§9</span> Correspondente Bancário</h2>
+      <p class="section-intro">Base: <code>/correspondente</code>. Fluxo completo de acesso a uma proposta em análise, via link com token.</p>
+
+      <div class="callout callout--info">
+        <span class="callout__icon">i</span>
+        <div><strong>Fluxo ponta a ponta:</strong> (1) o correspondente recebe um link com <code>token</code> + código de 6 dígitos por canais separados &middot; (2) <code>GET :token/validate</code> confirma que o link ainda é válido &middot; (3) <code>POST :token/auth</code> com o código de 6 dígitos devolve um token de sessão (JWT, 4h) &middot; (4) esse token, em <code>Authorization: Bearer</code>, dá acesso à proposta.</div>
+      </div>
+
+      <article class="endpoint" id="corr-validate">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/correspondente/:token/validate</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"isValid": true, "isExpired": false, "expiresAt": "2026-08-20T12:00:00.000Z"}</code></p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">404</span> <code>{isValid:false, message:'Link inválido ou já utilizado.'}</code> &middot; <span class="status status--4">410</span> <code>{isValid:false, isExpired:true, message:'Link expirado.'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="corr-auth">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/correspondente/:token/auth</code></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>{"accessCode": "123456"}</code></p>
+          <p><strong>Resposta 200:</strong> <code>{"success": true, "sessionToken": "eyJ..."}</code> — JWT válido por <strong>4 horas</strong>, enviar como <code>Authorization: Bearer {sessionToken}</code> nas chamadas seguintes.</p>
+          <h4>Erros</h4><p><span class="status status--4">401</span> <code>{success:false, message:'Código de acesso inválido ou link expirado.'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="corr-proposta">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/correspondente/proposta</code></header>
+        <div class="endpoint__body">
+          <p>Requer <code>Authorization: Bearer {sessionToken}</code>. <strong>Resposta 200:</strong> documento completo da proposta — imóvel, compradores, fiadores, vendedores (dados pessoais/cônjuge quando aplicável), responsável interno.</p>
+          <h4>Erros</h4><p><span class="status status--4">404</span> <code>{message:'Proposta não encontrada.'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro ao buscar proposta.'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="corr-historico">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/correspondente/proposta/historico</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> array do histórico, mais recente primeiro — <code>status</code>, <code>alteracao</code>, <code>comentario</code>, <code>updatedBy.nome</code>, <code>createdAt</code>.</p>
+          <h4>Erros</h4><p><span class="status status--4">404</span> <code>{message:'Histórico da proposta não encontrada.'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro ao buscar histórico da proposta.'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="corr-update">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/correspondente/update</code></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>{"status": "string", "comentario": "string"}</code>. <strong>Resposta 200:</strong> <code>{"success": true, "message": "Proposta atualizada com sucesso."}</code>. Atualiza a proposta e registra no histórico.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> <code>{message:'Erro ao atualizar proposta.'}</code></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ OUTROS ============ -->
+    <section class="section" id="outros">
+      <h2><span class="num">§10</span> Outros</h2>
+
+      <article class="endpoint" id="out-atendimento">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/atendimentos/:id</code></header>
+        <div class="endpoint__body">
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>Apesar do nome, a resposta <strong>não traz os dados do atendimento</strong> — só o perfil de interesse recalculado da pessoa vinculada.</div></div>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">{ "perfilInteresse": { /* preferências + */ "recomendados": [{"_id":"...","refImovel":"...","compatibilidade":87}], "recomendadosDetalhados": [ /* imóveis completos */ ] } }</pre></div>
+          <h4>Erros</h4><p><span class="status status--4">404</span> string JSON <code>"Atendimento não encontrado"</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro ao obter e atualizar atendimento', error:'...'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="out-lp-get">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/landing-page/historico</code></header>
+        <div class="endpoint__body">
+          <p><strong>Query (opcionais):</strong> <code>limit</code> (default 100, máx. 500), <code>url</code>, <code>origem</code>, <code>nome_campanha</code> (filtros exatos), <code>search</code> (busca textual).</p>
+          <p><strong>Resposta 200:</strong> array de <code>{url, query, ip, dispositivo, localizacao?, createdAt, updatedAt}</code>.</p>
+          <h4>Erros</h4><p><span class="status status--5">500</span> texto puro <code>Erro ao listar acessos</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="out-lp-post">
+        <header class="endpoint__head"><span class="method method--post">POST</span><code class="endpoint__path">/landing-page/historico</code></header>
+        <div class="endpoint__body">
+          <p><strong>Body:</strong> <code>url</code> (obrigatório), <code>dispositivo</code> (obrigatório: desktop/mobile/unknown), <code>query</code> (objeto livre, opcional).</p>
+          <p><strong>Resposta 201:</strong> <code>{"message": "Acesso registrado com sucesso"}</code>.</p>
+          <h4>Erros</h4><p><span class="status status--4">400</span> <code>{message:'URL e dispositivo são obrigatórios.'}</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro ao registrar acesso'}</code></p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="out-lp-delete">
+        <header class="endpoint__head"><span class="method method--delete">DEL</span><code class="endpoint__path">/landing-page/historico/:id</code></header>
+        <div class="endpoint__body">
+          <p><strong>Resposta 200:</strong> <code>{"message": "Registro de acesso removido com sucesso"}</code>.</p>
+          <h4>Erros</h4><p><span class="status status--4">404</span> string JSON <code>"Registro de acesso não encontrado"</code> &middot; <span class="status status--5">500</span> texto puro <code>Erro ao remover acesso</code></p>
+        </div>
+      </article>
+    </section>
+
+    <hr class="rule" />
+
+    <section class="section" id="apendice" style="margin-top:0">
+      <h2 style="border-bottom:none; padding-bottom:0">Apêndice — Notas de Integração</h2>
+      <div class="badge-list" style="display:block">
+        <ul style="padding-left:20px; color:var(--text)">
+          <li style="margin-bottom:10px"><strong>Nenhum endpoint tem rate limit ou proteção anti-spam ativa hoje.</strong> Recomendamos que os POSTs de lead sejam feitos a partir do backend do seu site, não diretamente do navegador do visitante.</li>
+          <li style="margin-bottom:10px"><strong>Formatos de resposta são inconsistentes entre endpoints</strong> (JSON vs. texto puro, <code>{message}</code> vs. string solta vs. <code>{erro}</code>/<code>{mensagem}</code>) — cada seção especifica o formato exato; não generalize.</li>
+          <li style="margin-bottom:10px"><strong>CORS está liberado para qualquer origem</strong> — chamadas diretas do navegador funcionam sem configuração adicional.</li>
+          <li>Em caso de dúvida ou comportamento diferente do documentado, contate o time ImoFlow — este documento reflete o sistema em 18/08/2026 e pode receber correções.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="doc-footer">
+      API do Portal ImoFlow &middot; documentação de referência v1.0 &middot; gerada em 18/08/2026
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  function fallbackCopy(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '-1000px';
+    textarea.style.left = '-1000px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(textarea);
+    return ok;
+  }
+
+  function showFeedback(btn, label) {
+    var original = btn.textContent;
+    btn.textContent = label;
+    setTimeout(function () { btn.textContent = original; }, 1400);
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.parentElement.querySelector('pre.code');
+      if (!pre) return;
+      var text = pre.innerText;
+
+      // navigator.clipboard exige contexto seguro (https/localhost) — ao abrir o
+      // arquivo direto do disco (file://) ela costuma ficar indisponível, então
+      // sempre cai no fallback via execCommand, que funciona em qualquer contexto.
+      if (window.isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(function () { showFeedback(btn, 'Copiado'); })
+          .catch(function () { showFeedback(btn, fallbackCopy(text) ? 'Copiado' : 'Selecione e copie'); });
+      } else {
+        showFeedback(btn, fallbackCopy(text) ? 'Copiado' : 'Selecione e copie');
+      }
+    });
+  });
+</script>
+</body>
+</html>
