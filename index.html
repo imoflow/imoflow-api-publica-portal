@@ -211,6 +211,7 @@
   .m--get { background: var(--get-soft); color: var(--get); }
   .m--post { background: var(--post-soft); color: var(--post); }
   .m--delete { background: var(--delete-soft); color: var(--delete); }
+  .m--patch { background: var(--post-soft); color: var(--post); }
 
   .main {
     max-width: 900px;
@@ -299,6 +300,7 @@
   .method--get { background: var(--get-soft); color: var(--get); }
   .method--post { background: var(--post-soft); color: var(--post); }
   .method--delete { background: var(--delete-soft); color: var(--delete); }
+  .method--patch { background: var(--post-soft); color: var(--post); }
   .endpoint__path { font-family: var(--mono); font-weight: 600; font-size: 15px; }
   .endpoint__title { color: var(--text-muted); font-size: 13.5px; margin-left: auto; }
   .endpoint__body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
@@ -579,6 +581,18 @@
         <li><a href="#out-lp-get"><span class="m m--get">GET</span>landing-page/historico</a></li>
         <li><a href="#out-lp-post"><span class="m m--post">POST</span>landing-page/historico</a></li>
         <li><a href="#out-lp-delete"><span class="m m--delete">DEL</span>landing-page/historico</a></li>
+      </ul>
+    </details>
+
+    <details class="nav-group" open>
+      <summary>Área do cliente</summary>
+      <ul class="nav-list">
+        <li><a href="#cli-visao">Visão geral da tela</a></li>
+        <li><a href="#cli-get"><span class="m m--get">GET</span>/pessoas/:id</a></li>
+        <li><a href="#cli-descartar-interesse"><span class="m m--patch">PATCH</span>/pessoas/:id/descartar-interesse</a></li>
+        <li><a href="#cli-reativar"><span class="m m--patch">PATCH</span>/pessoas/:id/reativar-interesse</a></li>
+        <li><a href="#cli-marcar"><span class="m m--patch">PATCH</span>/pessoas/:id/marcar-interesse</a></li>
+        <li><a href="#cli-descartar-recomendado"><span class="m m--patch">PATCH</span>/pessoas/:id/descartar-recomendado</a></li>
       </ul>
     </details>
 
@@ -1322,6 +1336,169 @@
         <div class="endpoint__body">
           <p><strong>Resposta 200:</strong> <code>{"message": "Registro de acesso removido com sucesso"}</code>.</p>
           <h4>Erros</h4><p><span class="status status--4">404</span> string JSON <code>"Registro de acesso não encontrado"</code> &middot; <span class="status status--5">500</span> texto puro <code>Erro ao remover acesso</code></p>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="area-cliente">
+      <h2><span class="num">§11</span> Área do cliente (imóveis de interesse)</h2>
+      <p class="section-intro">Endpoints para montar, no seu site, a página em que o cliente final vê os imóveis e empreendimentos que o corretor enviou para ele e responde a cada um (descartar, reativar, marcar interesse). Na ImoFlow essa página é <code>/cliente/{id}</code>.</p>
+
+      <article class="endpoint" id="cli-visao">
+        <header class="endpoint__head"><span class="method method--get">TELA</span><code class="endpoint__path">/cliente/:id</code><span class="endpoint__title">Visão geral: o que a página faz</span></header>
+        <div class="endpoint__body">
+          <p>O <code>:id</code> da URL é o ID do <strong>cliente (pessoa)</strong> no CRM da ImoFlow. A página funciona assim:</p>
+          <ol>
+            <li>Ao abrir <code>/cliente/:id</code>, faz <strong>uma</strong> chamada <a href="#cli-get"><code>GET /pessoas/:id</code></a>. Ela devolve o nome do cliente e três listas: <strong>De interesse</strong>, <strong>Recomendados</strong> e <strong>Descartados</strong> (cada uma com imóveis e empreendimentos).</li>
+            <li>Se quiser mostrar os dados do corretor responsável, use o <code>idResponsavelAtendimento</code> retornado em <a href="#cor-detalhe"><code>GET /corretores/:id</code></a>.</li>
+            <li>Mostra "Olá, {nome}" e as três abas, com um card por item.</li>
+            <li>Cada botão do card chama um <code>PATCH</code>, conforme a tabela abaixo.</li>
+          </ol>
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Aba</th><th>Botão</th><th>Chamada</th><th>O item vai para</th></tr></thead>
+            <tbody>
+              <tr><td>De interesse</td><td>Descartar</td><td><a href="#cli-descartar-interesse"><code>PATCH /pessoas/:id/descartar-interesse</code></a></td><td>Descartados</td></tr>
+              <tr><td>Recomendados</td><td>Tenho interesse</td><td><a href="#cli-marcar"><code>PATCH /pessoas/:id/marcar-interesse</code></a></td><td>De interesse</td></tr>
+              <tr><td>Recomendados</td><td>Descartar</td><td><a href="#cli-descartar-recomendado"><code>PATCH /pessoas/:id/descartar-recomendado</code></a></td><td>Descartados</td></tr>
+              <tr><td>Descartados</td><td>Reativar</td><td><a href="#cli-reativar"><code>PATCH /pessoas/:id/reativar-interesse</code></a></td><td>De interesse</td></tr>
+            </tbody>
+          </table></div>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>
+            <strong>Segurança:</strong> não há senha nem token neste fluxo. O <code>id</code> do cliente é o único identificador, então quem tem o link acessa a página e pode executar as ações. Gere os links só para o próprio cliente e não os exponha em páginas públicas.
+          </div></div>
+          <p><strong>Dica:</strong> mova o card de aba assim que o cliente clica, sem esperar a resposta, e <strong>desfaça</strong> o movimento se o <code>PATCH</code> falhar (é o que a ImoFlow faz).</p>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cli-get">
+        <header class="endpoint__head"><span class="method method--get">GET</span><code class="endpoint__path">/pessoas/:id</code><span class="endpoint__title">Dados da página do cliente</span></header>
+        <div class="endpoint__body">
+          <p><code>id</code> — ObjectId do cliente (pessoa). Sem query params.</p>
+          <h4>Resposta 200</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">{
+  "nome": "Fulano de Tal",
+  "idResponsavelAtendimento": "ObjectId do corretor" | null,
+  "perfilInteresse": {
+    "id_imovel": [ /* imóveis DE INTERESSE */ ],
+    "enviadosDetalhados": [ /* imóveis RECOMENDADOS */ ],
+    "descartadosDetalhados": [ /* imóveis DESCARTADOS */ ]
+  },
+  "empreendimentos": {
+    "interesse": [ /* empreendimentos de interesse */ ],
+    "recomendados": [ /* empreendimentos recomendados */ ],
+    "descartados": [ /* empreendimentos descartados */ ]
+  }
+}</pre></div>
+          <h4>Como cada lista é formada</h4>
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Lista</th><th>Regra</th></tr></thead>
+            <tbody>
+              <tr><td>De interesse</td><td>União dos itens de interesse de todos os atendimentos em andamento do cliente (sem nenhum em andamento, usa o mais recente)</td></tr>
+              <tr><td>Descartados</td><td>Itens que o cliente (ou o corretor) descartou</td></tr>
+              <tr><td>Recomendados</td><td>Itens enviados ao cliente que ainda <strong>não</strong> estão em interesse nem descartados</td></tr>
+            </tbody>
+          </table></div>
+          <p>Um item aparece em <strong>uma</strong> lista só. Imóveis não encontrados e empreendimentos ocultos não são retornados.</p>
+          <h4>Estrutura de cada imóvel</h4>
+          <div class="callout callout--warning"><span class="callout__icon">!</span><div>
+            Estrutura <strong>mais enxuta</strong> que a de <a href="#imoveis">§5 Imóveis</a>: não vêm <code>status</code>, <code>statusTag</code>, <code>seo_data</code>, plantas, vídeos nem tour.
+          </div></div>
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>_id</code></td><td>string</td><td>ID do imóvel (use no <code>imovelId</code> dos PATCH)</td></tr>
+              <tr><td><code>sobre</code></td><td>object</td><td>finalidade, tipo do imóvel, categoria, referência etc.</td></tr>
+              <tr><td><code>valores</code></td><td>object</td><td>valores de venda/aluguel e condições</td></tr>
+              <tr><td><code>localizacao</code></td><td>object</td><td>endereço (cidade, bairro, estado etc.)</td></tr>
+              <tr><td><code>caracteristicas</code></td><td>object</td><td><code>quartos</code>, <code>suites</code>, <code>banheiros</code>, <code>salas</code>, <code>vagas</code>, <code>imovelAreaTotal</code>, <code>imovelAreaUtil</code>, <code>imovelAreaComum</code>, <code>etiquetas</code></td></tr>
+              <tr><td><code>midias.imagens</code></td><td>array (máx. 10)</td><td><code>{filename,url,ordem}</code>. Se vier vazio, use uma imagem padrão sua.</td></tr>
+            </tbody>
+          </table></div>
+          <h4>Estrutura de cada empreendimento</h4>
+          <div class="table-wrap"><table class="fields">
+            <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+            <tbody>
+              <tr><td><code>_id</code></td><td>ID do empreendimento (use no <code>condominioId</code> dos PATCH)</td></tr>
+              <tr><td><code>nome</code>, <code>refEmpreendimento</code>, <code>categoria</code>, <code>categoriaImovel</code>, <code>tipo</code></td><td>Identificação e classificação</td></tr>
+              <tr><td><code>imagens</code>, <code>seo_data</code></td><td>Mídias e SEO</td></tr>
+              <tr><td><code>rua</code>, <code>bairro</code>, <code>cidade</code>, <code>estado</code></td><td>Endereço</td></tr>
+              <tr><td><code>dormitorios</code>, <code>suites</code>, <code>vagas</code>, <code>varanda</code>, <code>deposito</code>, <code>areaMinima</code>, <code>areaMaxima</code></td><td>Características das unidades</td></tr>
+              <tr><td><code>andares</code>, <code>blocos</code>, <code>apartamentoPorAndar</code>, <code>idadeImovel</code>, <code>fechado</code>, <code>unidades</code></td><td>Dados do empreendimento</td></tr>
+              <tr><td><code>valorMinimo</code>, <code>valorMaximo</code>, <code>visivelValores</code></td><td>Faixa de valores. Só exiba se <code>visivelValores</code> for <code>true</code>.</td></tr>
+            </tbody>
+          </table></div>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"ID de pessoa inválido"</code> &middot; <span class="status status--4">404</span> string JSON <code>"Pessoa não encontrada"</code> &middot; <span class="status status--5">500</span> <code>{message:'Erro ao obter perfil de interesse'}</code></p>
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl "https://so-mansoes.imoflow.app.br/api/portal/pessoas/ID_DO_CLIENTE"</pre></div>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cli-descartar-interesse">
+        <header class="endpoint__head"><span class="method method--patch">PATCH</span><code class="endpoint__path">/pessoas/:id/descartar-interesse</code><span class="endpoint__title">Descartar item de interesse</span></header>
+        <div class="endpoint__body">
+          <p>Cliente decide que não quer mais um item que estava em "De interesse".</p>
+          <p><strong>Botão na tela:</strong> aba <em>De interesse</em> → <strong>Descartar</strong></p>
+          <p><strong>Body (JSON):</strong> envie <strong>um</strong> dos dois campos: <code>{"imovelId": "ObjectId"}</code> para imóvel ou <code>{"condominioId": "ObjectId"}</code> para empreendimento. Se enviar os dois, vale o <code>imovelId</code>.</p>
+          <p><strong>Resultado:</strong> o item sai do interesse de <strong>todos</strong> os atendimentos do cliente e passa para <em>Descartados</em>. O descarte fica registrado.</p>
+          <p><strong>Resposta 200:</strong> <code>{"message": "Ação registrada com sucesso."}</code></p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"ID de pessoa inválido"</code> ou <code>"Informe o imóvel ou o empreendimento."</code> &middot; <span class="status status--4">404</span> string JSON <code>"Pessoa não encontrada"</code> &middot; <span class="status status--5">500</span> texto puro <code>Não foi possível concluir a ação.</code></p>
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl -X PATCH "https://so-mansoes.imoflow.app.br/api/portal/pessoas/ID_DO_CLIENTE/descartar-interesse" \
+  -H "Content-Type: application/json" \
+  -d '{"imovelId":"ID_DO_IMOVEL"}'</pre></div>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cli-reativar">
+        <header class="endpoint__head"><span class="method method--patch">PATCH</span><code class="endpoint__path">/pessoas/:id/reativar-interesse</code><span class="endpoint__title">Reativar item descartado</span></header>
+        <div class="endpoint__body">
+          <p>Cliente se arrependeu e quer voltar a considerar um item descartado.</p>
+          <p><strong>Botão na tela:</strong> aba <em>Descartados</em> → <strong>Reativar</strong></p>
+          <p><strong>Body (JSON):</strong> envie <strong>um</strong> dos dois campos: <code>{"imovelId": "ObjectId"}</code> para imóvel ou <code>{"condominioId": "ObjectId"}</code> para empreendimento. Se enviar os dois, vale o <code>imovelId</code>.</p>
+          <p><strong>Resultado:</strong> o item sai de <em>Descartados</em> e volta para <em>De interesse</em>, no atendimento em andamento mais recente (se o cliente não tiver nenhum atendimento, um novo é criado).</p>
+          <p><strong>Resposta 200:</strong> <code>{"message": "Ação registrada com sucesso."}</code></p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"ID de pessoa inválido"</code> ou <code>"Informe o imóvel ou o empreendimento."</code> &middot; <span class="status status--4">404</span> string JSON <code>"Pessoa não encontrada"</code> &middot; <span class="status status--5">500</span> texto puro <code>Não foi possível concluir a ação.</code></p>
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl -X PATCH "https://so-mansoes.imoflow.app.br/api/portal/pessoas/ID_DO_CLIENTE/reativar-interesse" \
+  -H "Content-Type: application/json" \
+  -d '{"imovelId":"ID_DO_IMOVEL"}'</pre></div>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cli-marcar">
+        <header class="endpoint__head"><span class="method method--patch">PATCH</span><code class="endpoint__path">/pessoas/:id/marcar-interesse</code><span class="endpoint__title">Marcar interesse em recomendado</span></header>
+        <div class="endpoint__body">
+          <p>Cliente demonstra interesse em um item que o corretor recomendou.</p>
+          <p><strong>Botão na tela:</strong> aba <em>Recomendados</em> → <strong>Tenho interesse</strong></p>
+          <p><strong>Body (JSON):</strong> envie <strong>um</strong> dos dois campos: <code>{"imovelId": "ObjectId"}</code> para imóvel ou <code>{"condominioId": "ObjectId"}</code> para empreendimento. Se enviar os dois, vale o <code>imovelId</code>.</p>
+          <p><strong>Resultado:</strong> o item passa para <em>De interesse</em> no atendimento em andamento mais recente (criado se não existir). A ação fica registrada no histórico do atendimento e o corretor responsável é avisado.</p>
+          <p><strong>Resposta 200:</strong> <code>{"message": "Ação registrada com sucesso."}</code></p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"ID de pessoa inválido"</code> ou <code>"Informe o imóvel ou o empreendimento."</code> &middot; <span class="status status--4">404</span> string JSON <code>"Pessoa não encontrada"</code> &middot; <span class="status status--5">500</span> texto puro <code>Não foi possível concluir a ação.</code></p>
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl -X PATCH "https://so-mansoes.imoflow.app.br/api/portal/pessoas/ID_DO_CLIENTE/marcar-interesse" \
+  -H "Content-Type: application/json" \
+  -d '{"imovelId":"ID_DO_IMOVEL"}'</pre></div>
+        </div>
+      </article>
+
+      <article class="endpoint" id="cli-descartar-recomendado">
+        <header class="endpoint__head"><span class="method method--patch">PATCH</span><code class="endpoint__path">/pessoas/:id/descartar-recomendado</code><span class="endpoint__title">Descartar item recomendado</span></header>
+        <div class="endpoint__body">
+          <p>Cliente recusa um item recomendado sem ter marcado interesse antes.</p>
+          <p><strong>Botão na tela:</strong> aba <em>Recomendados</em> → <strong>Descartar</strong></p>
+          <p><strong>Body (JSON):</strong> envie <strong>um</strong> dos dois campos: <code>{"imovelId": "ObjectId"}</code> para imóvel ou <code>{"condominioId": "ObjectId"}</code> para empreendimento. Se enviar os dois, vale o <code>imovelId</code>.</p>
+          <p><strong>Resultado:</strong> o item passa para <em>Descartados</em> e deixa de aparecer em <em>Recomendados</em>.</p>
+          <p><strong>Resposta 200:</strong> <code>{"message": "Ação registrada com sucesso."}</code></p>
+          <h4>Erros</h4>
+          <p><span class="status status--4">400</span> string JSON <code>"ID de pessoa inválido"</code> ou <code>"Informe o imóvel ou o empreendimento."</code> &middot; <span class="status status--4">404</span> string JSON <code>"Pessoa não encontrada"</code> &middot; <span class="status status--5">500</span> texto puro <code>Não foi possível concluir a ação.</code></p>
+          <h4>Exemplo</h4>
+          <div class="code-block"><button class="copy-btn" type="button">Copiar</button><pre class="code">curl -X PATCH "https://so-mansoes.imoflow.app.br/api/portal/pessoas/ID_DO_CLIENTE/descartar-recomendado" \
+  -H "Content-Type: application/json" \
+  -d '{"imovelId":"ID_DO_IMOVEL"}'</pre></div>
         </div>
       </article>
     </section>
